@@ -1,145 +1,139 @@
 <template>
   <v-container>
-    <v-layout
-      text-xs-center
-      wrap
-    >
+    <v-dialog v-model="showComments">
+      <!--<v-btn slot="activator" color="primary" dark>Open Dialog</v-btn>-->
+      <v-card ma-5>
+        <v-toolbar dark color="primary darken-1">
+          <v-toolbar-title>
+            <span>Comments</span>
+          </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-toolbar-items>
+            <!--<v-btn dark flat @click="alert()">ذخیره</v-btn>-->
+            <v-btn flat icon dark @click="showComments = false">
+              <v-icon>clear</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+
+        </v-toolbar>
+        <v-layout row wrap v-if="showingID !== -1" mt-3 ml-3>
+          <v-flex md4 v-for="item in posts[showingID].comments" :key="item.id">
+            <span class="font-weight-bold">{{item.username}}: &nbsp;</span>
+            <span class="font-weight-light">{{item.data}}</span>
+          </v-flex>
+        </v-layout>
+        <br>
+        <br>
+        <v-layout>
+          <v-flex xs4></v-flex>
+          <v-flex xs3>
+            <v-text-field
+              label="Add Comment"
+              v-model="newComment"
+            ></v-text-field>
+          </v-flex>
+          <v-flex xs1>
+            <v-btn flat icon @click="addComment">
+              <v-icon>send</v-icon>
+
+            </v-btn>
+          </v-flex>
+          <v-flex xs4></v-flex>
+        </v-layout>
+      </v-card>
+    </v-dialog>
+
+    <v-layout v-for="item in posts" :key="item.id" mb-3>
       <v-flex xs12>
-        <v-img
-          :src="require('../assets/logo.svg')"
-          class="my-3"
-          contain
-          height="200"
-        ></v-img>
-      </v-flex>
+        <v-card>
+          <v-img
+            :src="item.image"
+            aspect-ratio="2.75"
+          ></v-img>
 
-      <v-flex mb-4>
-        <h1 class="display-2 font-weight-bold mb-3">
-          Welcome to Vuetify
-        </h1>
-        <p class="subheading font-weight-regular">
-          For help and collaboration with other Vuetify developers,
-          <br>please join our online
-          <a href="https://community.vuetifyjs.com" target="_blank">Discord Community</a>
-        </p>
-      </v-flex>
+          <v-card-title primary-title>
+            <div>
+              <h4 class="headline mb-0">{{item.username}}
+                <v-btn icon @click="like(item)">
+                  <v-icon v-if="item.likes.includes(uid)" color="red">favorite</v-icon>
+                  <v-icon v-else>favorite_border</v-icon>
+                </v-btn>
+                <span class="font-weight-light">
+                {{item.likes.length}} Likes
+                </span>
+              </h4>
+              <div>{{item.caption}}</div>
+            </div>
+          </v-card-title>
 
-      <v-flex
-        mb-5
-        xs12
-      >
-        <h2 class="headline font-weight-bold mb-3">What's next?</h2>
-
-        <v-layout justify-center>
-          <a
-            v-for="(next, i) in whatsNext"
-            :key="i"
-            :href="next.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ next.text }}
-          </a>
-        </v-layout>
-      </v-flex>
-
-      <v-flex
-        xs12
-        mb-5
-      >
-        <h2 class="headline font-weight-bold mb-3">Important Links</h2>
-
-        <v-layout justify-center>
-          <a
-            v-for="(link, i) in importantLinks"
-            :key="i"
-            :href="link.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ link.text }}
-          </a>
-        </v-layout>
-      </v-flex>
-
-      <v-flex
-        xs12
-        mb-5
-      >
-        <h2 class="headline font-weight-bold mb-3">Ecosystem</h2>
-
-        <v-layout justify-center>
-          <a
-            v-for="(eco, i) in ecosystem"
-            :key="i"
-            :href="eco.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ eco.text }}
-          </a>
-        </v-layout>
+          <v-card-actions>
+            <v-btn flat color="orange" @click="showCommentsDialog(posts.indexOf(item))">Comments</v-btn>
+          </v-card-actions>
+        </v-card>
       </v-flex>
     </v-layout>
   </v-container>
 </template>
 
 <script>
-  export default {
-    data: () => ({
-      ecosystem: [
-        {
-          text: 'vuetify-loader',
-          href: 'https://github.com/vuetifyjs/vuetify-loader'
-        },
-        {
-          text: 'github',
-          href: 'https://github.com/vuetifyjs/vuetify'
-        },
-        {
-          text: 'awesome-vuetify',
-          href: 'https://github.com/vuetifyjs/awesome-vuetify'
-        }
-      ],
-      importantLinks: [
-        {
-          text: 'Documentation',
-          href: 'https://vuetifyjs.com'
-        },
-        {
-          text: 'Chat',
-          href: 'https://community.vuetifyjs.com'
-        },
-        {
-          text: 'Made with Vuetify',
-          href: 'https://madewithvuetifyjs.com'
-        },
-        {
-          text: 'Twitter',
-          href: 'https://twitter.com/vuetifyjs'
-        },
-        {
-          text: 'Articles',
-          href: 'https://medium.com/vuetify'
-        }
-      ],
-      whatsNext: [
-        {
-          text: 'Explore components',
-          href: 'https://vuetifyjs.com/components/api-explorer'
-        },
-        {
-          text: 'Select a layout',
-          href: 'https://vuetifyjs.com/layout/pre-defined'
-        },
-        {
-          text: 'Frequently Asked Questions',
-          href: 'https://vuetifyjs.com/getting-started/frequently-asked-questions'
-        }
-
-      ]
-    })
+export default {
+  data: () => ({
+    uid: 1,
+    showComments: false,
+    showingID: 1,
+    newComment: '',
+    posts: [
+      {
+        id: 1,
+        username: 'mammad',
+        image: 'https://cdn.vuetifyjs.com/images/cards/desert.jpg',
+        caption: 'sample caption',
+        likes: [10, 20, 30],
+        comments: [
+          {
+            id: 0,
+            username: 'soosk',
+            data: 'jkadhvkja lkajv hdklj hadkjg adlkgblfk d'
+          }
+        ]
+      },
+      {
+        id: 2,
+        username: 'hasan',
+        image: 'https://cdn.vuetifyjs.com/images/cards/desert.jpg',
+        caption: 'sample caption asdkfjasdl;fj kafl ja;ldkg jal;dfg ',
+        likes: [],
+        comments: []
+      }
+    ]
+  }),
+  methods: {
+    like (item) {
+      if (item.likes.includes(this.uid)) {
+        // unlike
+        item.likes = item.likes.filter((value, index, arr) => {
+          return value !== this.uid
+        })
+      } else {
+        item.likes.push(this.uid)
+      }
+    },
+    showCommentsDialog (id) {
+      this.showingID = id
+      console.log(this.showingID)
+      this.showComments = true
+    },
+    addComment () {
+      let cm = {
+        id: 10,
+        username: 'mam',
+        data: this.newComment
+      }
+      this.posts[this.showingID].comments.push(cm)
+      this.newComment = ''
+    }
   }
+}
 </script>
 
 <style>

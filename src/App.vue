@@ -1,34 +1,45 @@
 <template>
   <v-app>
     <v-toolbar app>
-      <v-toolbar-title class="headline text-uppercase">
-        <span>Vuetify</span>
-        <span class="font-weight-light">MATERIAL DESIGN</span>
+      <v-toolbar-title class="headline" to="/home">
+
+          <v-btn flat to="/">
+            <v-img
+              :src="`https://www.instagram.com/static/images/ico/xxhdpi_launcher.png/99cf3909d459.png`"
+              aspect-ratio="1"
+              contain
+              height="24"
+            ></v-img>
+          </v-btn>
+            <span class="font-italic font-weight-light" to="/home">Instagram &nbsp;</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn
-        flat
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-      >
-        <span class="mr-2">Latest Release</span>
-      </v-btn>
+      <v-toolbar-items>
+        <v-btn
+          flat
+          to="users"
+        >
+          <span class="mr-2">All Users</span>
+        </v-btn>
+        <v-btn
+          flat
+          to="/about"
+        >
+          <span class="mr-2">About</span>
+        </v-btn>
+
+      </v-toolbar-items>
     </v-toolbar>
 
     <v-content>
-      <HelloWorld/>
+      <router-view></router-view>
     </v-content>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld'
-
 export default {
   name: 'App',
-  components: {
-    HelloWorld
-  },
   data () {
     return {
       //
