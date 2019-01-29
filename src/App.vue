@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app color = "lightgray">
     <v-toolbar app>
       <v-toolbar-title class="headline" to="/home">
 
