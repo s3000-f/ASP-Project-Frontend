@@ -1,59 +1,25 @@
 <template>
   <v-container>
-    <v-dialog v-model="showComments">
-      <!--<v-btn slot="activator" color="primary" dark>Open Dialog</v-btn>-->
-      <v-card ma-5>
-        <v-toolbar dark color="primary darken-1">
-          <v-toolbar-title>
-            <span>Comments</span>
-          </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-toolbar-items>
-            <!--<v-btn dark flat @click="alert()">ذخیره</v-btn>-->
-            <v-btn flat icon dark @click="showComments = false">
-              <v-icon>clear</v-icon>
-            </v-btn>
-          </v-toolbar-items>
-
-        </v-toolbar>
-        <v-layout row wrap v-if="showingID !== -1" mt-3 ml-3>
-          <v-flex md4 v-for="item in posts[showingID].comments" :key="item.id">
-            <span class="font-weight-bold">{{item.username}}: &nbsp;</span>
-            <span class="font-weight-light">{{item.data}}</span>
-          </v-flex>
-        </v-layout>
-        <br>
-        <br>
-        <v-layout>
-          <v-flex xs4></v-flex>
-          <v-flex xs3>
-            <v-text-field
-              label="Add Comment"
-              v-model="newComment"
-            ></v-text-field>
-          </v-flex>
-          <v-flex xs1>
-            <v-btn flat icon @click="addComment">
-              <v-icon>send</v-icon>
-
-            </v-btn>
-          </v-flex>
-          <v-flex xs4></v-flex>
-        </v-layout>
-      </v-card>
-    </v-dialog>
+    <Comments
+      :postID="showingID"
+      :post="posts[showingID]"
+      userID="10"
+      :showComments="showComments"
+    >
+    </Comments>
+    <add-post :add-post-dialog="addPostDialog"></add-post>
 
     <v-layout v-for="item in posts" :key="item.id" mb-3>
       <v-flex xs12>
         <v-card>
           <v-img
-            :src="item.image"
+            :src="item.fileName"
             aspect-ratio="2.75"
           ></v-img>
 
           <v-card-title primary-title>
             <div>
-              <h4 class="headline mb-0">{{item.username}}
+              <h4 class="headline mb-0">{{item.userName}}
                 <v-btn icon @click="like(item)">
                   <v-icon v-if="item.likes.includes(uid)" color="red">favorite</v-icon>
                   <v-icon v-else>favorite_border</v-icon>
@@ -72,38 +38,50 @@
         </v-card>
       </v-flex>
     </v-layout>
+    <v-btn
+      fab
+      small
+      color="red lighten-4"
+      top
+      right
+      absolute
+      @click="addPostDialog = true"
+    >
+      <v-icon>add</v-icon>
+    </v-btn>
   </v-container>
 </template>
 
 <script>
+import Comments from './Comments'
+import AddPost from './AddPost'
+import axios from 'axios'
+
 export default {
+  components: { AddPost, Comments },
+  computed: {
+    uid: function () {
+      return this.$store.state.user.id
+    }
+  },
   data: () => ({
-    uid: 1,
     showComments: false,
+    addPostDialog: false,
     showingID: 1,
-    newComment: '',
     posts: [
       {
         id: 1,
-        username: 'mammad',
-        image: 'https://cdn.vuetifyjs.com/images/cards/desert.jpg',
+        userName: 'mammad',
+        fileName: 'https://cdn.vuetifyjs.com/images/cards/desert.jpg',
         caption: 'sample caption',
-        likes: [10, 20, 30],
-        comments: [
-          {
-            id: 0,
-            username: 'soosk',
-            data: 'jkadhvkja lkajv hdklj hadkjg adlkgblfk d'
-          }
-        ]
+        likes: [10, 20, 30]
       },
       {
         id: 2,
-        username: 'hasan',
-        image: 'https://cdn.vuetifyjs.com/images/cards/desert.jpg',
+        userName: 'hasan',
+        fileName: 'https://cdn.vuetifyjs.com/images/cards/desert.jpg',
         caption: 'sample caption asdkfjasdl;fj kafl ja;ldkg jal;dfg ',
-        likes: [],
-        comments: []
+        likes: []
       }
     ]
   }),
@@ -111,11 +89,21 @@ export default {
     like (item) {
       if (item.likes.includes(this.uid)) {
         // unlike
-        item.likes = item.likes.filter((value, index, arr) => {
-          return value !== this.uid
-        })
+        axios.delete(`http://localhost:8181/api/posts/${item.id}/like/${this.uid}`).then(response => {
+          console.log(response)
+          item.likes = item.likes.filter((value, index, arr) => {
+            return value !== this.uid
+          })
+        }).catch(e => console.log(e))
       } else {
-        item.likes.push(this.uid)
+        let data = {
+          UserId: this.uid,
+          PostId: item.id
+        }
+        axios.post(`http://localhost:8181/api/posts/${item.id}/like`, data).then(response => {
+          console.log(response)
+          item.likes.push(this.uid)
+        }).catch(e => console.log(e))
       }
     },
     showCommentsDialog (id) {
@@ -123,15 +111,15 @@ export default {
       console.log(this.showingID)
       this.showComments = true
     },
-    addComment () {
-      let cm = {
-        id: 10,
-        username: 'mam',
-        data: this.newComment
-      }
-      this.posts[this.showingID].comments.push(cm)
-      this.newComment = ''
+    getPosts () {
+      axios.get('http://localhost:8181/api/posts').then(response => {
+        console.log(response)
+        this.posts = response.data
+      }).catch(e => console.log(e))
     }
+  },
+  created () {
+    this.getPosts()
   }
 }
 </script>

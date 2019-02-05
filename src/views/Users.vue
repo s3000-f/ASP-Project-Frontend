@@ -58,7 +58,7 @@ export default {
   },
   methods: {
     getUsers () {
-      axios.get('https://localhost:44334/api/users')
+      axios.get('http://localhost:8181/api/users')
         .then(response => {
           console.log(response)
           this.users = response.data
